@@ -157,3 +157,56 @@ In [4]: p = Person("小陈", "男", 18)
 Person(name=小陈, gender=男, age=18)
 ```
 
+# Python继承中使用\_\_属性的注意点
+
+```python
+In [1]: class A:
+   ...:     def __init__(self, a, b):
+   ...:         self._a = a
+   ...:         self._b = b
+   ...:
+
+In [2]: class B(A):
+   ...:     def __init__(self, a, b):
+   ...:         super().__init__(a, b)
+   ...:         self._a = a + 1 # 保护属性，子类会覆盖
+   ...:         self._b = b + 1
+   ...:
+
+In [3]: b = B(1, 2)
+
+In [4]: b._a
+Out[4]: 2
+
+In [5]: b._b
+Out[5]: 3
+
+In [14]: class A:
+    ...:     def __init__(self, a, b):
+    ...:         self.__a = a # 保护属性，子类使用__a并不会覆盖父类的该属性，而是会生成子类自己的私有属性，这一点尤其需要注意
+    ...:         self.__b = b
+    ...:
+
+In [15]: class B(A):
+    ...:     def __init__(self, a, b):
+    ...:         super().__init__(a, b)
+    ...:         self.__a = a + 1  
+    ...:         self.__b = b + 1
+    ...:
+    ...:
+
+In [16]: b = B(1, 2)
+
+In [17]: b._A__a
+Out[17]: 1
+
+In [18]: b._B__a
+Out[18]: 2
+
+In [20]: b._A__b
+Out[20]: 2
+
+In [21]: b._B__b
+Out[21]: 3
+```
+
