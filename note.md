@@ -210,3 +210,28 @@ In [21]: b._B__b
 Out[21]: 3
 ```
 
+# 关于Python  \_\_del\_\_方法的说明
+
+**不同于c++的析构函数当离开作用域时必定会调用**
+
+1. 不能保证何时\_\_del\_\_实际调用(或在循环引用的情况下是否完全调用)当解释器退出时不会确保为仍然存在的对象调用 \_\_del\_\_() 方法。
+2. \_\_del\_\_() 可以在解释器关闭阶段被执行。因此，它需要访问的全局变量（包含其他模块）可能已被删除或设为 None。
+3. \_\_del\_\_() 可在任意代码被执行时启用，包括来自任意线程的代码。如果 \_\_del_\\_() 需要接受锁或启用其他阻塞资源，可能会发生死锁
+4. 由于不能保证它会被执行，因此永远不要将您需要运行的代码放入其中\_\_del\_\_()
+## 更好的写法为
+
+```python
+
+import atexit
+
+
+class Package:
+    def __init__(self):
+        self.files = []
+        atexit.register(self.cleanup)
+
+    def cleanup(self):
+        print("Running cleanup...")
+        for file in self.files:
+            print("Unlinking file: {}".format(file))
+```
