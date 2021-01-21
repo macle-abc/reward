@@ -38,11 +38,15 @@ print(cursor.fetchall())
 1. 对于update的数据先进行select
 2. 可以使用临时表来缓存查询的结果
 3. 需要大批量插入或者更新的时候，可以去考虑一次更新数万条记录写在一个sql语句中，然后循环执行该语句，比单独循环每一条sql语句的效率要高得多
+4. 对于需要满足多个条件根据条件满足程度来排序的查询可以使用
+    ```sql
+    SELECT CONDITION_1 + CONDITION_2 + CONDITION_3 AS RANK FROM `t` ORDER BY RANK -- IF CONDITION_1 = TRUE THEN 1 ELSE 0 最终变成满足条件的个数作为rank
+    ```
 
 # 数据库设计建议
 
 1. 可以设置一个is\_valid字段来逻辑上的删除
-2. 对于频繁修改的表，可以设置update_time以及updator来记录修改的数据，或者新增一个表来单独记录修改的数据，以便复原等操作
+2. 对于频繁修改的表，可以设置update\_time以及updator来记录修改的数据，或者新增一个表来单独记录修改的数据，以便复原等操作
 
 # 对于异常的建议
 
