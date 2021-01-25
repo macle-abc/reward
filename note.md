@@ -36,12 +36,60 @@ print(cursor.fetchall())
 # 数据库查询建议
 
 1. 对于update的数据先进行select
+
 2. 可以使用临时表来缓存查询的结果
+
 3. 需要大批量插入或者更新的时候，可以去考虑一次更新数万条记录写在一个sql语句中，然后循环执行该语句，比单独循环每一条sql语句的效率要高得多
+
 4. 对于需要满足多个条件根据条件满足程度来排序的查询可以使用
     ```sql
     SELECT CONDITION_1 + CONDITION_2 + CONDITION_3 AS RANK FROM `t` ORDER BY RANK -- IF CONDITION_1 = TRUE THEN 1 ELSE 0 最终变成满足条件的个数作为rank
     ```
+    
+    ```sql
+    SELECT
+        e.name AS ename,
+        e.id AS eid,
+        IIF ( e.grade = @grade, 'y', 'n' ) AS grade,
+        IIF (
+            @discount IS NULL,
+            IIF ( e.type = @type, 'y', 'n' ),
+            IIF ( e.type = @type and e.discount = @discount, 'y', 'n')
+        ) AS type,
+        s.status AS status,
+        IIF (
+            @discount IS NULL,
+            IIF ( e.grade = @grade, 1, 0 ) + IIF ( e.type = @type, 1, 0 ),
+            IIF ( e.grade = @grade, 1, 0 ) + IIF ( e.type = @type, 1, 0 ) + IIF ( e.discount = @discount, 1, 0 )
+        ) AS rank,
+        IIF (s.status = 3, 1, 0) AS status_rank
+    FROM
+        s
+        INNER JOIN e ON s.id = e.sid
+    WHERE
+        s.name = @name
+    ORDER BY
+        status_rank DESC, rank DESC
+    ```
+    
+5. UNION ALL和UNION的区别
+
+    UNION ALL不会去重，UNION则会根据整条数据作为基础来去重
+
+    ```sql
+    SELECT 1, 2 
+    UNION 
+    SELECT 1, 2 
+    -- 结果为1, 2
+    SELECT 1, 2
+    UNION ALL 
+    SELECT 1, 2
+    -- 结果为
+    -- 1， 2
+    -- 1， 2
+    ```
+
+    
 
 # 数据库设计建议
 
